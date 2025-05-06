@@ -1,5 +1,4 @@
-from ..init_db import db
-from datetime import date
+from app.init_db import db
 
 class WaterBalance(db.Model):
     __tablename__ = 'water_balance'

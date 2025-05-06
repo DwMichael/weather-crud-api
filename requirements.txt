@@ -2,4 +2,5 @@ flask
 psycopg2-binary
 Flask-SQLAlchemy
 python-dotenv
+requests
 datetime
