@@ -55,11 +55,14 @@ def register_callbacks(app):
                 # Dane dla plotly
                 df = pd.DataFrame(results)
 
+                df['date'] = pd.to_datetime(df['date'])
+                df['hour'] = df['date'].dt.strftime('%H:%M')
+
                 # Wykres
                 title = f"Poziom wody - min: {df['water_amount'].min()}, max: {df['water_amount'].max()}"
                 fig = px.line(
                     df,
-                    x="date",
+                    x="hour",
                     y="water_amount",
                     title=title,
                     labels={"value": "Poziom wody [L]", "variable": "Typ"},
