@@ -66,6 +66,17 @@ def register_callbacks(app):
                     markers=True
                 )
 
+                # Pozioma linia – minimalny poziom wody
+                fig.add_hline(
+                    y=min_water_level,
+                    line_dash="dash",
+                    line_color="red",
+                    annotation_text=f"Min. poziom: {min_water_level} L",
+                    annotation_position="bottom right",
+                    annotation_font_size=12,
+                    opacity=0.8
+                )
+
                 return (
                     toast_success_status("✅ Symulacja zakończona sukcesem."),
                     dbc.Container([
