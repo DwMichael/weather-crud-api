@@ -45,7 +45,7 @@ def run_water_simulation(user_data: UserData, full_rainfall_forecast: list[tuple
     num_simulation_days = min(30, len(full_rainfall_forecast))
 
     # Parametry regulatora PI
-    Kp = 0.5  # Wzmocnienie proporcjonalne
+    Kp = 0.8  # Wzmocnienie proporcjonalne
     Ki = 0.1  # Wzmocnienie całkujące
     integral_error = 0.0 # Błąd całkujący
 
