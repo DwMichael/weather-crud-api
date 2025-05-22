@@ -1,9 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-import plotly.io as pio
-pio.templates.default = "seaborn"
-
 def navbar():
     # Navbar
     return dbc.Navbar(
