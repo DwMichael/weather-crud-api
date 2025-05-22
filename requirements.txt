@@ -4,3 +4,11 @@ Flask-SQLAlchemy
 python-dotenv
 requests
 datetime
+dash==3.0.4
+dash-bootstrap-components
+pandas
+plotly
+plotly.express
+numpy
+scikit-fuzzy
+scipy
