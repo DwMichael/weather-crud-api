@@ -1,10 +1,10 @@
 # app/init_db.py
-from dash import Dash, dash
+from dash import Dash
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 import dash_bootstrap_components as dbc
-from app.callbacks.cards_callback import register_callbacks
+from app.callbacks.init_callbacks import register_callbacks
 from app.layout.layouts import main_layout
 
 db = SQLAlchemy()
@@ -39,7 +39,7 @@ def create_dash_app():
     with server.app_context():
         db.create_all()
 
-    # Tworzymy Dash na bazie tego Flaska
+    # Tworzymy Dash na bazie tego Flask
     app = Dash(__name__, server=server, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.LUX])
     app.title = "Symulacja zbiornika"
 
