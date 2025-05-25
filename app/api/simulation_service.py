@@ -114,7 +114,6 @@ def run_water_simulation(user_data: UserData, full_rainfall_forecast: list[tuple
 
 
 
-
 def run_water_simulation_fuzzy(user_data: UserData, full_rainfall_forecast: list[tuple[date, float]]) -> list[dict]:
 
     tank_capacity = user_data.tank_capacity
@@ -221,13 +220,13 @@ def run_water_simulation_fuzzy(user_data: UserData, full_rainfall_forecast: list
         current_water_level = min(current_water_level, max_water_level)
 
         daily_result = {
-            "date": forecast_date,
-            "water_amount_eod": round(current_water_level, 2),
-            "rainfall_forecast_mm": round(daily_rainfall_mm, 2),
+            "date": forecast_date.isoformat() if isinstance(forecast_date, date) else str(forecast_date),
+            "water_amount": round(current_water_level, 2),
+            "rainfall_amount": round(daily_rainfall_mm, 2),
             "daily_consumption": round(water_consumed_today, 2),
-            "saved_water_from_rain": round(rainwater_collected_liters, 2),
-            "pumped_up_municipal_water": round(pumped_up_for_reporting, 2),
-            "overflow_water_lost": round(overflow_for_reporting, 2),
+            "saved_water": round(rainwater_collected_liters, 2),
+            "pumped_up_water": round(pumped_up_for_reporting, 2),
+            "pumped_out_water": round(overflow_for_reporting, 2),
         }
         simulation_results.append(daily_result)
 

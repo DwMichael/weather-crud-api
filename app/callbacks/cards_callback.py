@@ -53,13 +53,23 @@ def register_callbacks(app):
                 results = response.json()
 
                 # Dane dla plotly
-                df = pd.DataFrame(results)
+                pi_results_data = results.get('pi_controller_results')
+                if pi_results_data is None:
+                    return toast_error_status("❌ Błąd: Brak danych 'pi_controller_results' w odpowiedzi API."), None
+                
+                df = pd.DataFrame(pi_results_data)
+
+                if 'date' not in df.columns:
+                    return toast_error_status("❌ Błąd: Brak kolumny 'date' w danych do wykresu."), None
+                if 'water_amount' not in df.columns:
+                     return toast_error_status("❌ Błąd: Brak kolumny 'water_amount' w danych do wykresu."), None
+
 
                 df['date'] = pd.to_datetime(df['date'])
                 df['hour'] = df['date'].dt.strftime('%H:%M')
 
                 # Wykres
-                title = f"Poziom wody - min: {df['water_amount'].min()}, max: {df['water_amount'].max()}"
+                title = f"Poziom wody (Regulator PI) - min: {df['water_amount'].min()}, max: {df['water_amount'].max()}"
                 fig = px.line(
                     df,
                     x="hour",
