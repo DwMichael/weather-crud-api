@@ -2,22 +2,50 @@ import dash_bootstrap_components as dbc
 from dash import dcc, dash_table, html
 
 
-def create_charts_block(fig, df):
-    stats_table = stats_accordion(df)
-    switch_chart = switch_chart_mode()
+def create_charts_block(fig_pi, df_pi, fig_fuzzy, df_fuzzy, comparison_fig, comparison_fig_percentage,
+                        comparison_fig_difference, comp_fig):
+    switch_chart_pi = switch_chart_mode()
+    switch_chart_fuzzy = switch_chart_mode(callback_id='chart-mode-fuzzy')
+
+    stats_table_pi = stats_accordion(df_pi)
+    stats_table_fuzzy = stats_accordion(df_fuzzy)
     return dbc.Container([
-        switch_chart,
-        dcc.Graph(id="water_graph", figure=fig, config={"displayModeBar": True}),
-        stats_table,
-        html.Br()
-        # dcc.Graph(id="water_graph", figure=fig1, config={"displayModeBar": True}),
-        # dcc.Graph(id="water_graph", figure=fig2, config={"displayModeBar": True}),
-        # dcc.Graph(id="water_graph", figure=fig3, config={"displayModeBar": True}),
+
+        # === KARTA: REGULATOR PI ===
+        dbc.Card([
+            dbc.CardHeader("🔧 Regulator PI", className="fs-4 fw-bold text-primary"),
+            dbc.CardBody([
+                switch_chart_pi,
+                dcc.Graph(id="water_graph_pi", figure=fig_pi, config={"displayModeBar": True}),
+                stats_table_pi
+            ])
+        ], className="mb-4 shadow-sm"),
+
+        # === KARTA: REGULATOR FUZZY ===
+        dbc.Card([
+            dbc.CardHeader("🔧 Regulator rozmyty", className="fs-4 fw-bold text-primary"),
+            dbc.CardBody([
+                switch_chart_fuzzy,
+                dcc.Graph(id="water_graph_fuzzy", figure=fig_fuzzy, config={"displayModeBar": True}),
+                stats_table_fuzzy
+            ])
+        ], className="mb-4 shadow-sm"),
+
+        dbc.Card([
+            dbc.CardHeader("📊 Porównanie regulatorów", className="fs-4 fw-bold text-dark"),
+            dbc.CardBody([
+                dcc.Graph(id="comparison_graph_1", figure=comp_fig, config={"displayModeBar": True}),
+                dcc.Graph(id="comparison_graph_normal", figure=comparison_fig, config={"displayModeBar": True}),
+                dcc.Graph(id="comparison_graph_percentage", figure=comparison_fig_percentage, config={"displayModeBar": True}),
+                #dcc.Graph(id="comparison_graph_difference", figure=comparison_fig_difference, config={"displayModeBar": True}),
+            ])
+        ], className="mb-4 shadow-sm"),
+
     ], className="p-4 my-4 bg-light rounded shadow")
 
 
 # Switch chart mode
-def switch_chart_mode():
+def switch_chart_mode(callback_id='chart-mode-pi'):
     return dbc.Container([
         dbc.Row(
             dbc.Col(
@@ -29,7 +57,7 @@ def switch_chart_mode():
             dbc.Col(
                 dbc.ButtonGroup([
                     dbc.RadioItems(
-                        id="chart-mode",
+                        id=callback_id,
                         options=[
                             {"label": "Statyczny", "value": "static"},
                             {"label": "Animacja", "value": "animated"},
@@ -47,6 +75,7 @@ def switch_chart_mode():
     ],
         className="mb-4"
     )
+
 
 # Data table for stats
 def create_data_table(df):
@@ -115,4 +144,3 @@ def stats_accordion(df):
         className="mb-4 shadow-sm rounded border border-secondary-subtle bg-white",
         flush=False
     )
-
