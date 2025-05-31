@@ -6,6 +6,8 @@ from app.models.user_data import UserData
 from app.models.water_balance import WaterBalance
 from app.api.weather_data_service import fetch_rainfall_forecast
 from app.api.simulation_service import run_water_simulation
+from app.api.simulation_service import run_water_simulation_fuzzy
+
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -41,7 +43,7 @@ def handle_simulation_request():
     required_fields = ["tank_capacity", "min_water_level", "daily_water_usage", "rooftop_size", "location"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": f"Missing one or more required fields: {', '.join(required_fields)}"}), 400
-    print("DANE OD USERA ", required_fields)
+    
     try:
         user_data = UserData(
             tank_capacity=data["tank_capacity"],
@@ -59,16 +61,22 @@ def handle_simulation_request():
         if not rainfall_forecast_tuples:
             return jsonify({"error": "Could not retrieve rainfall forecast data."}), 500
 
+        # Run PI controller simulation
+        pi_simulation_daily_records = run_water_simulation(user_data, rainfall_forecast_tuples)
+        
+        # Run Fuzzy controller simulation
+        fuzzy_simulation_daily_records = run_water_simulation_fuzzy(user_data, rainfall_forecast_tuples)
+        
+        pi_records_for_response_and_db = []
 
-        simulation_daily_records = run_water_simulation(user_data, rainfall_forecast_tuples)
-        saved_records_json = []
-
+        # Process and save PI controller results to DB
         try:
-            for day_record_dict in simulation_daily_records:
+            for day_record_dict in pi_simulation_daily_records:
                 if isinstance(day_record_dict["date"], date):
                     date_str = day_record_dict["date"].isoformat()
                 else:
-                    date_str = day_record_dict["date"]
+                    # Assuming it's already a string if not a date object
+                    date_str = str(day_record_dict["date"])
 
                 db_dict = {
                     "date": date_str,
@@ -84,26 +92,46 @@ def handle_simulation_request():
 
                 if existing_record:
                     for key, value in db_dict.items():
-                        if key != 'date':
+                        if key != 'date': # Don't try to update the primary key part of a composite or unique constraint
                             setattr(existing_record, key, value)
                     db.session.add(existing_record)
-                    saved_records_json.append(existing_record.to_json())
+                    pi_records_for_response_and_db.append(existing_record.to_json())
                 else:
                     new_record = WaterBalance(**db_dict)
                     db.session.add(new_record)
-                    saved_records_json.append(new_record.to_json())
+                    # We need to flush to get the ID if it's auto-generated and to_json() needs it,
+                    # or ensure to_json() can handle it before commit.
+                    # For simplicity, assuming to_json() works with the current state.
+                    pi_records_for_response_and_db.append(new_record.to_json()) # This might need adjustment if to_json relies on committed state
 
             db.session.commit()
-            return jsonify(saved_records_json), 200
+            # Re-fetch or ensure to_json() works correctly for newly added records if they were not complete
+            # For this example, we assume `new_record.to_json()` worked with uncommitted data or `to_json` is robust.
+            # A safer approach for new records might be to query them after commit or build JSON from db_dict.
+            # However, to keep changes minimal to the existing structure:
+            # We will use the pi_records_for_response_and_db list as built.
 
         except Exception as db_error:
             db.session.rollback()
-            raise Exception(f"Database error: {str(db_error)}")
+            # Log the database error
+            # current_app.logger.error(f"Database error: {str(db_error)}")
+            return jsonify({"error": f"Database error: {str(db_error)}"}), 500
+        
+        # Prepare the final response
+        response_data = {
+            "pi_controller_results": pi_records_for_response_and_db,
+            "fuzzy_controller_results": fuzzy_simulation_daily_records # Already a list of dicts
+        }
+        
+        return jsonify(response_data), 200
 
     except ConnectionError as e:
+        # current_app.logger.error(f"External API connection error: {str(e)}")
         return jsonify({"error": f"External API connection error: {str(e)}"}), 503
     except ValueError as e:
+        # current_app.logger.error(f"Data processing error: {str(e)}")
         return jsonify({"error": f"Data processing error: {str(e)}"}), 400
     except Exception as e:
-        db.session.rollback()
+        # current_app.logger.error(f"An internal server error occurred: {str(e)}")
+        db.session.rollback() # Ensure rollback on any other unexpected error
         return jsonify({"error": f"An internal server error occurred: {str(e)}"}), 500

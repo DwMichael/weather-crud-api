@@ -98,7 +98,7 @@ def simulation_section():
                     min=1000,
                     max=5000,
                     step=100,
-                    value=3000,
+                    value=1500,
                     marks={i: f"{i}" for i in range(1000, 5001, 500)},
                     tooltip={"placement": "bottom", "always_visible": True}
                 )
@@ -124,7 +124,7 @@ def simulation_section():
                     min=1,
                     max=3000,
                     step=1,
-                    value=500,
+                    value=250,
                     marks={i: str(i) for i in [1, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000]},
                     tooltip={"placement": "bottom", "always_visible": True}
                 )
@@ -201,12 +201,13 @@ def start_simulation_button():
                 className="w-100 rounded-pill shadow"
             ),
 
-        ], width=3)
+        ], width=3),
+        dcc.Store(id="simulation-data")
     ], justify="center", className="mt-4")
 
 
 def simulation_graphs():
-    return html.Div(id="water-graph")
+    return html.Div(id="water-graph",)
 
 
 

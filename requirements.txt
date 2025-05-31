@@ -12,3 +12,4 @@ plotly.express
 numpy
 scikit-fuzzy
 scipy
+networkx
