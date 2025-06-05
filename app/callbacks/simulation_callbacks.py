@@ -1,7 +1,7 @@
 from dash import Input, Output, State
 
 from app.callbacks.logic.charts import generate_static_chart, generate_animation_chart, generate_total_comparison, \
-    generate_percentage_comparison, generate_difference_chart, generate_comparison_subplots
+    generate_percentage_comparison, generate_difference_chart, generate_comparison_subplots, generate_average_comparison
 from app.callbacks.logic.charts_block import create_charts_block
 from app.callbacks.logic.fetch_simulation_data import fetch_simulation_data
 from app.callbacks.logic.process_simulation_data import process_simulation_data
@@ -36,7 +36,7 @@ def register_simulation_callbacks(app):
             fig_fuzzy = generate_static_chart(df_fuzzy_long, "Poziom wody (Regulator rozmyty)")
 
             comp_fig = generate_comparison_subplots(df_long, df_fuzzy_long)
-            comparison_fig = generate_total_comparison(df_long, df_fuzzy_long)
+            comparison_fig = generate_average_comparison(df_long, df_fuzzy_long)
             comparison_fig_percentage = generate_percentage_comparison(df_long, df_fuzzy_long)
             comparison_fig_difference = generate_difference_chart(df_long, df_fuzzy_long)
 

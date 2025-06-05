@@ -124,6 +124,32 @@ def generate_total_comparison(df_pi_long, df_fuzzy_long):
 
     return fig
 
+def generate_average_comparison(df_pi_long, df_fuzzy_long):
+    pi_avg = df_pi_long.groupby("type")["value"].mean()
+    fuzzy_avg = df_fuzzy_long.groupby("type")["value"].mean()
+
+    comparison_df = pd.DataFrame({
+        "Rodzaj": pi_avg.index,
+        "Regulator PI": pi_avg.values,
+        "Regulator Rozmyty": fuzzy_avg.values
+    })
+
+    comparison_df = comparison_df.melt(id_vars="Rodzaj", var_name="Regulator", value_name="Wartość")
+
+    fig = px.bar(
+        comparison_df,
+        x="Rodzaj",
+        y="Wartość",
+        color="Regulator",
+        barmode="group",
+        color_discrete_map=color_map_sum,
+        title="Porównanie średniego poziomu wody",
+        labels={"Rodzaj": "Typ", "Wartość": "Średnia [L]"}
+    )
+
+    return fig
+
+
 
 def generate_percentage_comparison(df_pi_long, df_fuzzy_long):
     pi_total = df_pi_long.groupby("type")["value"].sum()
